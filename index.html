@@ -4,67 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz e Tetris</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #1b1b1b;
-            color: #ffffff;
-        }
-        #quiz-container {
-            width: 50%;
-            padding: 20px;
-            box-sizing: border-box;
-            background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-        }
-        #quiz-container h1, #quiz-container h2, #quiz-container p {
-            margin: 0 0 20px 0;
-        }
-        #quiz-container button {
-            background-color: #00ff00;
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            margin-top: 10px;
-        }
-        #quiz-container button:hover {
-            background-color: #00cc00;
-        }
-        #tetris-container {
-            width: 50%;
-            padding: 20px;
-            box-sizing: border-box;
-            background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        #tetris {
-            background-color: #000;
-            width: 300px;
-            height: 600px;
-            position: relative;
-            border: 2px solid #fff;
-        }
-        .piece {
-            width: 30px;
-            height: 30px;
-            position: absolute;
-            background-color: #00ff00;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="tetris-container">
@@ -106,34 +46,6 @@
         </div>
     </div>
 
-    <script>
-        let currentQuestion = 1;
-        const correctAnswers = {
-            1: 'A',
-            2: 'D',
-            // Adicione as respostas corretas para as demais perguntas aqui
-        };
-
-        function showPage(pageId) {
-            document.querySelectorAll('.question').forEach(question => {
-                question.classList.add('hidden');
-            });
-            document.getElementById(`question${pageId}`).classList.remove('hidden');
-        }
-
-        function checkAnswer(questionNumber, answer) {
-            if (answer === correctAnswers[questionNumber]) {
-                document.getElementById(`piece${questionNumber}`).classList.remove('hidden');
-                currentQuestion++;
-                if (currentQuestion <= Object.keys(correctAnswers).length) {
-                    showPage(currentQuestion);
-                } else {
-                    alert('Parabéns, você completou o quiz!');
-                }
-            } else {
-                alert('Resposta incorreta, tente novamente.');
-            }
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
