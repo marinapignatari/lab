@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Tetris Quiz</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #4B0082, #00FF00);
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 90%;
+            max-width: 1200px;
+            height: 90vh;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .content {
+            display: flex;
+            flex: 1;
+        }
+        .quiz, .tetris {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .quiz h2, .tetris h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .question {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .question h3 {
+            margin-bottom: 10px;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+        }
+        .options li {
+            margin-bottom: 10px;
+        }
+        .options li button {
+            width: 100%;
+            padding: 10px;
+            background: #4B0082;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .options li button:hover {
+            background: #00FF00;
+        }
+        #discountCode {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+        .tetris canvas {
+            width: 100%;
+            max-width: 300px;
+            background: #000;
+            border: 2px solid #fff;
+            aspect-ratio: 1 / 2;
+        }
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            .quiz, .tetris {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="quiz">
+                <h2>Tech Quiz</h2>
+                <div id="questions">
+                    <!-- Quiz questions will be dynamically inserted here -->
+                </div>
+                <div id="discountCode">Seu código de desconto é: <strong>TETRIS2024</strong></div>
+            </div>
+            <div class="tetris">
+                <canvas id="tetrisCanvas" width="300" height="600"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "O que é HTML?",
+                options: ["Linguagem de marcação", "Linguagem de programação", "Banco de dados", "Sistema operacional"],
+                answer: 0
+            },
+            {
+                question: "O que é CSS?",
+                options: ["Linguagem de programação", "Folha de estilo", "Framework", "Banco de dados"],
+                answer: 1
+            },
+            {
+                question: "Qual linguagem é usada para criar scripts em páginas web?",
+                options: ["Python", "JavaScript", "C++", "Java"],
+                answer: 1
+            },
+            {
+                question: "Qual é o significado de SQL?",
+                options: ["Structured Query Language", "Simple Query Language", "Structured Question Language", "Short Query Language"],
+                answer: 0
+            },
+            {
+                question: "O que é um framework?",
+                options: ["Uma biblioteca", "Um conjunto de ferramentas", "Um ambiente de desenvolvimento", "Uma estrutura reutilizável"],
+                answer: 3
+            },
+            {
+                question: "Qual é a função de um compilador?",
+                options: ["Compilar código", "Interpretar código", "Executar código", "Editar código"],
+                answer: 0
+            },
+            {
+                question: "Qual linguagem é conhecida por sua simplicidade e uso em ciência de dados?",
+                options: ["C", "Python", "Java", "HTML"],
+                answer: 1
+            },
+            {
+                question: "O que é um algoritmo?",
+                options: ["Uma linguagem de programação", "Um conjunto de instruções", "Um tipo de dado", "Uma ferramenta de depuração"],
+                answer: 1
+            },
+            {
+                question: "Qual é a principal função do CSS?",
+                options: ["Adicionar interatividade", "Estilizar o conteúdo", "Criar estrutura", "Gerenciar banco de dados"],
+                answer: 1
+            },
+            {
+                question: "O que é uma variável?",
+                options: ["Um valor constante", "Um espaço de memória", "Uma função", "Uma estrutura de dados"],
+                answer: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+
+        function loadQuestion() {
+            if (currentQuestion < quizData.length) {
+                const questionData = quizData[currentQuestion];
+                const questionElement = document.createElement("div");
+                questionElement.className = "question";
+                questionElement.innerHTML = `
+                    <h3>${questionData.question}</h3>
+                    <ul class="options">
+                        ${questionData.options.map((option, index) => `
+                            <li><button onclick="checkAnswer(${index})">${option}</button></li>
+                        `).join('')}
+                    </ul>
+                `;
+                document.getElementById("questions").innerHTML = "";
+                document.getElementById("questions").appendChild(questionElement);
+            } else {
+                document.getElementById("discountCode").style.display = "block";
+            }
+        }
+
+        function checkAnswer(selectedOption) {
+            const questionData = quizData[currentQuestion];
+            if (selectedOption === questionData.answer) {
+                correctAnswers++;
+                addTetrisPiece();
+            }
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        const canvas = document.getElementById('tetrisCanvas');
+        const context = canvas.getContext('2d');
+        const ROW = 20;
+        const COL = COLUMN = 10;
+        const SQ = squareSize = canvas.width / COL;
+        const VACANT = 'BLACK'; // color of an empty square
+
+        // draw a square
+        function drawSquare(x, y, color) {
+            context.fillStyle = color;
+            context.fillRect(x * SQ, y * SQ, SQ, SQ);
+
+            context.strokeStyle = 'BLACK';
+            context.strokeRect(x * SQ, y * SQ, SQ, SQ);
+        }
+
+        // create the board
+        let board = [];
+        for (r = 0; r < ROW; r++) {
+            board[r] = [];
+            for (c = 0; c < COL; c++) {
+                board[r][c] = VACANT;
+            }
+        }
+
+        // draw the board
+        function drawBoard() {
+            for (r = 0; r < ROW; r++) {
+                for (c = 0; c < COL; c++) {
+                    drawSquare(c, r, board[r][c]);
+                }
+            }
+        }
+
+        drawBoard();
+
+        // the pieces and their colors
+        const PIECES = [
+            [Z, "red"],
+            [S, "green"],
+            [T, "yellow"],
+            [O, "blue"],
+            [L, "purple"],
+            [I, "cyan"],
+            [J, "orange"]
+        ];
+
+        // generate random pieces
+        function randomPiece() {
+            let r = randomN = Math.floor(Math.random() * PIECES.length); // 0 -> 6
+            return new Piece(PIECES[r][0], PIECES[r][1]);
+        }
+
+        let p = randomPiece();
+
+        // The Object Piece
+        function Piece(tetromino, color) {
+            this.tetromino = tetromino;
+            this.color = color;
+
+            this.tetrominoN = 0; // we start from the first pattern
+            this.activeTetromino = this.tetromino[this.tetrominoN
